@@ -1,0 +1,4 @@
+flutter/ephemeral
+assets/serviceAccountKey.json
+android/app/google-services.json
+firebase.json

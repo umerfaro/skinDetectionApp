@@ -1,0 +1,41 @@
+const appname = "OmniChat";
+const appversion = "Version 1.0.0";
+const credits = "@Omni";
+const email = "Email";
+const emailHint = "@gmail.com";
+const password = "Password";
+const passwordHint = "*******";
+const login = "Login";
+const forgotPassword = "Forgot Password";
+const signUp = "Sign Up";
+const dontHaveAccount = "Don't have an account?";
+const alreadyHaveAccount = "Already have an account? ";
+const loginWith = "Log In with";
+const name = "Name";
+const nameHint = "John";
+const phone = "Phone";
+const phoneHint = "Enter your phone number";
+const retryPassword = "Re-type Password";
+const ret = "*******";
+const privacyPolicy = "Privacy Policy";
+const termsAndConditions = "Terms & Conditions";
+const agreeTo = "I agree to the ";
+const loginWithPhone = "Login with Phone";
+const sendOtp = "Send OTP";
+const logout = "Log Out";
+const editProfile = "Edit Profile";
+
+//home screen strings
+const search = "Search";
+
+const logOut = "User logout Successfully";
+const loginSuccess = "User Login Successfully";
+const loginFailed = "User Login Failed";
+const changeProfile = "Change";
+const update = "Update";
+const camera = "Camera";
+const gallery = "Gallery";
+const oldPassword = "Old Password";
+const newPassword = "New Password";
+const exitApp = "Confirm Exit";
+const exitAppMessage = "Are you sure you want to exit?";
