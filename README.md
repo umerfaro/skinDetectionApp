@@ -96,11 +96,11 @@ Here's a glimpse of the TrackerApp:
 
 | Screenshot 1                                      | Screenshot 2                                        | Screenshot 3                                       |
 | :------------------------------------------------: | :------------------------------------------------: | :------------------------------------------------: |
-| ![App Screenshot 1](https://raw.githubusercontent.com/umerfaro/mtbc-Trackerapp/9b4f241d247b80840f35385e3464eb1613664802/download.png) | ![App Screenshot 2](https://raw.githubusercontent.com/umerfaro/mtbc-Trackerapp/9b4f241d247b80840f35385e3464eb1613664802/download%20(1).png) | ![App Screenshot 3](https://raw.githubusercontent.com/umerfaro/mtbc-Trackerapp/9b4f241d247b80840f35385e3464eb1613664802/download%20(2).png) |
+| ![App Screenshot 1]() | ![App Screenshot 2]() | ![App Screenshot 3]() |
 
 | Screenshot 4                                      | Screenshot 5                                        | *(Add more if needed)* |
 | :------------------------------------------------: | :------------------------------------------------: | :------------------------------------------------: |
-| ![App Screenshot 4](https://raw.githubusercontent.com/umerfaro/mtbc-Trackerapp/9b4f241d247b80840f35385e3464eb1613664802/download%20(3).png) | ![App Screenshot 5](https://raw.githubusercontent.com/umerfaro/mtbc-Trackerapp/9b4f241d247b80840f35385e3464eb1613664802/download%20(4).png) |  |
+| ![App Screenshot 4]() | ![App Screenshot 5]() |  |
 
 ## Project Structure
 
