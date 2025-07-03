@@ -3,9 +3,9 @@ import 'package:cloudinary/cloudinary.dart';
 
 class CloudinaryService {
   // Replace these with your actual Cloudinary credentials
-  static const String cloudName = '';
-  static const String apiKey = '';
-  static const String apiSecret = '';
+  static const String cloudName = 'dp3rfuvdg';
+  static const String apiKey = '994118457232448';
+  static const String apiSecret = 'DyZuVh0JX6Des9K6YqFE33MgaMQ';
 
   static final cloudinary = Cloudinary.signedConfig(
     apiKey: apiKey,

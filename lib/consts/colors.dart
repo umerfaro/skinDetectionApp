@@ -27,5 +27,5 @@ class AppColors {
   static const Color iconOnSecondaryButton = Color(0xFF6B7280);
 
   // --- Background Colors ---
-  static const Color cardBackground = Color(0xFF6366F1);
+  static const Color cardBackground = Color(0xFF1a1a1a);
 }

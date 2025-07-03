@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../consts/colors.dart';
-import '../../controller/confirmImageController.dart';
+import '../../viewmodels/skin_analysis_viewmodel.dart';
+import '../../viewmodels/image_capture_viewmodel.dart';
+import '../../ui/ReportScreen/ReportScreen.dart';
 
 // --- Confirm Image Screen ---
 // This screen is displayed after the user selects an image.
@@ -13,8 +15,9 @@ class ConfirmImageScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(ConfirmImageController());
-    controller.initializeImage(File(imagePath));
+    final analysisVM = Get.find<SkinAnalysisViewModel>();
+    final imageCaptureVM = Get.find<ImageCaptureViewModel>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -72,10 +75,10 @@ class ConfirmImageScreen extends StatelessWidget {
                   () => SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      onPressed: controller.isProcessing.value
+                      onPressed: analysisVM.isAnalyzing
                           ? null
-                          : controller.confirmImage,
-                      icon: controller.isProcessing.value
+                          : () => _confirmImage(analysisVM),
+                      icon: analysisVM.isAnalyzing
                           ? const SizedBox(
                               width: 20,
                               height: 20,
@@ -91,9 +94,9 @@ class ConfirmImageScreen extends StatelessWidget {
                               color: AppColors.iconOnPrimaryButton,
                             ),
                       label: Text(
-                        controller.isProcessing.value
-                            ? 'Processing...'
-                            : 'Confirm',
+                        analysisVM.isAnalyzing
+                            ? 'Analyzing...'
+                            : 'Confirm & Analyze',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppColors.textOnPrimaryButton,
@@ -117,7 +120,7 @@ class ConfirmImageScreen extends StatelessWidget {
                       child: _buildSecondaryActionButton(
                         text: 'Retake',
                         icon: Icons.camera_alt_outlined,
-                        onPressed: controller.retakeImage,
+                        onPressed: () => _retakeImage(imageCaptureVM),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -125,7 +128,7 @@ class ConfirmImageScreen extends StatelessWidget {
                       child: _buildSecondaryActionButton(
                         text: 'Reselect',
                         icon: Icons.upload_file_outlined,
-                        onPressed: controller.reselectImage,
+                        onPressed: () => _reselectImage(imageCaptureVM),
                       ),
                     ),
                   ],
@@ -136,6 +139,79 @@ class ConfirmImageScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Confirm image and start analysis
+  Future<void> _confirmImage(SkinAnalysisViewModel analysisVM) async {
+    try {
+      final imageFile = File(imagePath);
+      await analysisVM.analyzeImage(imageFile);
+
+      if (analysisVM.currentAnalysis != null) {
+        final analysis = analysisVM.currentAnalysis!;
+
+        // Ensure all data types are correct and handle nulls properly
+        final analysisResultData = <String, dynamic>{
+          'diagnosis': analysis.diagnosis,
+          'description': analysis.description,
+          'confidence': analysis.confidence ?? 0.0,
+          'severity': analysis.severity?.value ?? 'Unknown',
+          'risk_level': analysis.riskLevel?.value ?? 'Unknown',
+          'recommendations': List<String>.from(analysis.recommendations),
+          'followUp':
+              analysis.followUp ?? 'Consult with a healthcare professional',
+          'raw_output': analysis.rawOutput ?? <String, dynamic>{},
+        };
+
+        final mockAnalysisResult = <String, dynamic>{
+          'success': true,
+          'data': analysisResultData,
+        };
+
+        // Navigate to report screen
+        Get.to(
+          () => ReportScreen(
+            imagePath: imagePath,
+            analysisResult: mockAnalysisResult,
+          ),
+        );
+      } else {
+        // No analysis result available
+        Get.snackbar(
+          'Error',
+          'No analysis result available. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to analyze image: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  // Retake image (go back and open camera)
+  void _retakeImage(ImageCaptureViewModel imageCaptureVM) {
+    Get.back(); // Go back to home screen
+    // Trigger camera capture
+    Future.delayed(const Duration(milliseconds: 300), () {
+      imageCaptureVM.pickImageFromCamera();
+    });
+  }
+
+  // Reselect image (go back and open gallery)
+  void _reselectImage(ImageCaptureViewModel imageCaptureVM) {
+    Get.back(); // Go back to home screen
+    // Trigger gallery selection
+    Future.delayed(const Duration(milliseconds: 300), () {
+      imageCaptureVM.pickImageFromGallery();
+    });
   }
 
   // Helper method to build secondary action buttons on the confirm screen.

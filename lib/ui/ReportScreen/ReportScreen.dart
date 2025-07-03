@@ -2,8 +2,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../consts/colors.dart';
-import '../../controller/history_controller.dart';
-import '../../model/skin_report.dart';
+import '../../models/skin_report_enhanced.dart';
+import '../../models/analysis_result.dart';
+import '../../data/repositories/skin_report_repository.dart';
+import '../../core/results/result.dart';
+import '../../viewmodels/skin_report_history_viewmodel.dart';
 
 class ReportScreen extends StatelessWidget {
   final String imagePath;
@@ -17,7 +20,9 @@ class ReportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final historyController = Get.put(HistoryController());
+    final reportRepository = Get.find<ISkinReportRepository>();
+    final historyVM = Get.find<SkinReportHistoryViewModel>();
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -66,20 +71,7 @@ class ReportScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () async {
-                  final data = analysisResult['data'] as Map<String, dynamic>;
-                  final report = SkinReport(
-                    imagePath: imagePath,
-                    date: DateTime.now().toIso8601String(),
-                    diagnosis: data['diagnosis'] ?? 'Unknown',
-                    description: data['description'] ?? '',
-                    rawOutput: data['raw_output'] ?? {},
-                  );
-                  await historyController.addReport(report);
-                  Get.snackbar(
-                    'Saved',
-                    'Report saved to history',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
+                  await _saveReport(reportRepository, historyVM);
                 },
                 icon: const Icon(Icons.save),
                 label: const Text('Save Report'),
@@ -100,6 +92,112 @@ class ReportScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _saveReport(
+    ISkinReportRepository reportRepository,
+    SkinReportHistoryViewModel historyVM,
+  ) async {
+    try {
+      final data = analysisResult['data'] as Map<String, dynamic>;
+
+      // Create analysis result first
+      final analysis = AnalysisResult(
+        diagnosis: data['diagnosis'] ?? 'Unknown',
+        description: data['description'] ?? '',
+        confidence: (data['confidence'] ?? 0.0).toDouble(),
+        severity: _parseSeverityLevel(data['severity']),
+        riskLevel: _parseRiskLevel(data['risk_level']),
+        recommendations:
+            (data['recommendations'] as List<dynamic>?)
+                ?.map((e) => e.toString())
+                .toList() ??
+            [],
+        followUp: data['followUp']?.toString(),
+        rawOutput: data,
+        analysisDate: DateTime.now(),
+      );
+
+      // Create enhanced skin report using factory constructor
+      final report = SkinReportEnhanced.fromAnalysisResult(
+        imagePath: imagePath,
+        analysisResult: analysis,
+        notes: data['notes']?.toString(),
+      );
+
+      // Save using the repository directly
+      final result = await reportRepository.saveReport(report);
+
+      result.fold(
+        (savedReport) async {
+          // ✅ REAL-TIME HISTORY UPDATE: Add report to local state instantly
+          // This ensures the history screen shows the new report immediately
+          // without needing to restart the app or manually refresh
+          historyVM.addReportToLocalState(savedReport);
+
+          Get.snackbar(
+            'Success',
+            'Report saved to history',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+        },
+        (error) {
+          Get.snackbar(
+            'Error',
+            'Failed to save report: ${error.message}',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        },
+      );
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to save report: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  SeverityLevel? _parseSeverityLevel(dynamic severity) {
+    if (severity == null) return null;
+    final severityStr = severity.toString().toLowerCase();
+
+    switch (severityStr) {
+      case 'mild':
+        return SeverityLevel.mild;
+      case 'moderate':
+        return SeverityLevel.moderate;
+      case 'severe':
+        return SeverityLevel.severe;
+      case 'critical':
+        return SeverityLevel.critical;
+      default:
+        return null;
+    }
+  }
+
+  RiskLevel? _parseRiskLevel(dynamic riskLevel) {
+    if (riskLevel == null) return null;
+    final riskStr = riskLevel.toString().toLowerCase();
+
+    switch (riskStr) {
+      case 'low':
+        return RiskLevel.low;
+      case 'medium':
+        return RiskLevel.medium;
+      case 'high':
+        return RiskLevel.high;
+      case 'critical':
+        return RiskLevel.critical;
+      default:
+        return null;
+    }
   }
 
   Widget _buildImageSection() {

@@ -1,52 +1,102 @@
-import 'package:hive/hive.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
-import 'ui/Home/home.dart';
-import 'consts/consts.dart';
-import 'model/skin_report.dart';
+import 'consts/colors.dart';
+import 'consts/strings.dart';
+import 'core/di/dependencies.dart';
+import 'models/skin_report_enhanced.dart';
+import 'views/main_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive
   await Hive.initFlutter();
-  Hive.registerAdapter(SkinReportAdapter());
+
+  // Register Hive adapters
+  Hive.registerAdapter(SkinReportEnhancedAdapter());
+
+  // Initialize dependencies
+  Dependencies.initialize();
+
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
-  // Define your light and dark themes (unchanged except formatting)
+  // Define your light and dark themes
   final ThemeData lightTheme = ThemeData(
-    // The brightness of the theme.
-    brightness: Brightness.dark,
-    // The primary color of the theme.
+    brightness: Brightness.light,
     primaryColor: AppColors.darkGreen,
-    // The background color of the scaffold.
     scaffoldBackgroundColor: AppColors.background,
-    // The font family of the theme.
     fontFamily: 'Inter',
-    // The text theme of the application.
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppColors.darkGreen,
+      brightness: Brightness.light,
+    ),
     textTheme: const TextTheme(
-      // The style for the body text.
       bodyLarge: TextStyle(color: AppColors.textSecondary),
-      // The style for the body text.
       bodyMedium: TextStyle(color: AppColors.textSecondary),
-      // The style for the headline text.
       headlineMedium: TextStyle(
         color: AppColors.textPrimary,
         fontWeight: FontWeight.bold,
         fontSize: 28,
       ),
     ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      titleTextStyle: const TextStyle(
+        color: AppColors.textPrimary,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+      iconTheme: const IconThemeData(color: AppColors.textPrimary),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      filled: true,
+      fillColor: Colors.grey[50],
+    ),
   );
 
   final ThemeData darkTheme = ThemeData(
-    // The brightness of the theme.
     brightness: Brightness.dark,
-    // The primary color of the theme.
     primaryColor: AppColors.darkGreen,
-    // The background color of the scaffold.
-    scaffoldBackgroundColor: AppColors.background,
+    scaffoldBackgroundColor: Colors.grey[900],
+    fontFamily: 'Inter',
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppColors.darkGreen,
+      brightness: Brightness.dark,
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      titleTextStyle: const TextStyle(
+        color: Colors.white,
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+      iconTheme: const IconThemeData(color: Colors.white),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      filled: true,
+      fillColor: Colors.grey[800],
+    ),
   );
 
   @override
@@ -57,7 +107,12 @@ class MyApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
-      home: const Home(),
+      home: const MainView(),
+      // Error handling
+      unknownRoute: GetPage(
+        name: '/unknown',
+        page: () => const Scaffold(body: Center(child: Text('Page not found'))),
+      ),
     );
   }
 }
